@@ -4,8 +4,6 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { toast } from "sonner";
-import { useAuth } from "@clerk/nextjs";
 
 import {
   Dialog,
@@ -33,9 +31,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Loader2, UserPlus, X, Check, UserX, UserCog } from "lucide-react";
+import { Loader2, UserPlus, UserX } from "lucide-react";
 
-import { BoardMember, useBoardMembers } from "@/hooks/queries/use-board-members";
+import { useBoardMembers } from "@/hooks/queries/use-board-members";
 
 // Form schema for adding a member
 const addMemberSchema = z.object({
@@ -58,7 +56,6 @@ export function BoardMembersDialog({
   onClose,
   isOwner,
 }: BoardMembersDialogProps) {
-  const { userId } = useAuth();
   const [isAddingMember, setIsAddingMember] = useState(false);
   
   const {
@@ -84,7 +81,7 @@ export function BoardMembersDialog({
       await addMember.mutateAsync(values);
       form.reset();
       setIsAddingMember(false);
-    } catch (error) {
+    } catch {
       // Error is handled in the mutation
     }
   };
@@ -96,7 +93,7 @@ export function BoardMembersDialog({
         memberId,
         data: { role: newRole },
       });
-    } catch (error) {
+    } catch {
       // Error is handled in the mutation
     }
   };
@@ -105,7 +102,7 @@ export function BoardMembersDialog({
   const handleRemoveMember = async (memberId: string) => {
     try {
       await removeMember.mutateAsync(memberId);
-    } catch (error) {
+    } catch {
       // Error is handled in the mutation
     }
   };

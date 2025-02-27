@@ -32,7 +32,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useBoardShares } from "@/hooks/queries/use-board-shares";
 
 // Form schema for creating a share link
@@ -79,7 +78,7 @@ export function BoardShareDialog({
       await createShareLink.mutateAsync(values);
       form.reset();
       setIsCreatingLink(false);
-    } catch (error) {
+    } catch {
       // Error is handled in the mutation
     }
   };
@@ -101,7 +100,7 @@ export function BoardShareDialog({
   const handleDeleteLink = async (shareId: string) => {
     try {
       await deleteShareLink.mutateAsync(shareId);
-    } catch (error) {
+    } catch {
       // Error is handled in the mutation
     }
   };

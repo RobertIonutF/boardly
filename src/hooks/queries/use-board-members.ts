@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { toast } from "sonner";
 
 // Types
@@ -25,6 +25,10 @@ interface AddMemberData {
 
 interface UpdateMemberData {
   role: "EDITOR" | "VIEWER";
+}
+
+interface ErrorResponse {
+  message: string;
 }
 
 /**
@@ -54,9 +58,9 @@ export function useBoardMembers(boardId: string) {
       queryClient.invalidateQueries({ queryKey });
       toast.success(`${newMember.user.email} added to board`);
     },
-    onError: (error: any) => {
+    onError: (error: AxiosError<ErrorResponse>) => {
       console.error("Failed to add member:", error);
-      toast.error(error.response?.data || "Failed to add member");
+      toast.error(error.response?.data?.message || "Failed to add member");
     },
   });
 
@@ -73,9 +77,9 @@ export function useBoardMembers(boardId: string) {
       queryClient.invalidateQueries({ queryKey });
       toast.success(`Updated ${updatedMember.user.email}'s role`);
     },
-    onError: (error: any) => {
+    onError: (error: AxiosError<ErrorResponse>) => {
       console.error("Failed to update member:", error);
-      toast.error(error.response?.data || "Failed to update member");
+      toast.error(error.response?.data?.message || "Failed to update member");
     },
   });
 
@@ -96,9 +100,9 @@ export function useBoardMembers(boardId: string) {
         toast.success("Member removed from board");
       }
     },
-    onError: (error: any) => {
+    onError: (error: AxiosError<ErrorResponse>) => {
       console.error("Failed to remove member:", error);
-      toast.error(error.response?.data || "Failed to remove member");
+      toast.error(error.response?.data?.message || "Failed to remove member");
     },
   });
 
