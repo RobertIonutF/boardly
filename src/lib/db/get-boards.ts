@@ -89,6 +89,7 @@ export interface BoardWithStats extends Board {
   completedTasksCount?: number;
   userId: string;
   archived: boolean;
+  isFavorite: boolean;
 }
 
 /**
@@ -167,6 +168,7 @@ export async function getAllBoards(userId: string, searchQuery?: string): Promis
         completedTasksCount,
         userId: board.userId,
         archived: board.archived,
+        isFavorite: board.isFavorite,
       };
     });
   } catch (error) {
