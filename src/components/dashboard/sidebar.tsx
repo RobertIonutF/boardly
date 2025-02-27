@@ -14,6 +14,7 @@ import {
   UserCircle,
   LogOut,
   ChevronDown,
+  Calendar,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -80,6 +81,16 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
           >
             <ListTodo className="h-4 w-4" />
             Boards
+          </Link>
+          <Link
+            href="/dashboard/calendar"
+            className={cn(
+              "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-foreground",
+              pathname === "/dashboard/calendar" && "bg-muted text-foreground"
+            )}
+          >
+            <Calendar className="h-4 w-4" />
+            Calendar
           </Link>
           <Link
             href="/dashboard/settings"

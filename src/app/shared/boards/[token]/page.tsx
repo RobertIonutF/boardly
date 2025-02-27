@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
-import { auth } from "@clerk/nextjs";
+  import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
 import { format } from "date-fns";
 
@@ -22,7 +22,7 @@ interface SharedBoardPageProps {
 
 export default async function SharedBoardPage({ params }: SharedBoardPageProps) {
   const { token } = params;
-  const { userId } = auth();
+  const { userId } = await auth();
 
   // Find the share link
   const shareLink = await db.boardShare.findUnique({
