@@ -1,0 +1,188 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Since we're using Clerk for authentication, we'll reference users by their Clerk ID
+model User {
+  id        String   @id // Clerk user ID
+  email     String   @unique
+  name      String?
+  imageUrl  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  boards        Board[]       @relation("BoardToUser")
+  cards         Card[]        @relation("CardToUser")
+  comments      Comment[]     @relation("CommentToUser")
+  activities    Activity[]    @relation("ActivityToUser")
+  assignedCards Card[]        @relation("CardAssignee")
+  boardMembers  BoardMember[] @relation("BoardMemberToUser")
+}
+
+model Board {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  imageUrl    String?
+  category    String   @default("Other")
+  color       String   @default("#4f46e5")
+  archived    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  isFavorite  Boolean  @default(false)
+
+  // Relations
+  userId     String
+  user       User          @relation("BoardToUser", fields: [userId], references: [id], onDelete: Cascade)
+  lists      List[]
+  activities Activity[]
+  members    BoardMember[]
+  shareLinks BoardShare[]
+
+  @@index([userId])
+}
+
+model List {
+  id        String   @id @default(cuid())
+  title     String
+  order     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  boardId String
+  board   Board  @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  cards   Card[]
+
+  @@index([boardId])
+}
+
+model Card {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  order       Int
+  dueDate     DateTime?
+  completed   Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  listId      String
+  list        List         @relation(fields: [listId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User         @relation("CardToUser", fields: [userId], references: [id], onDelete: Cascade)
+  assigneeId  String?
+  assignee    User?        @relation("CardAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  labels      Label[]
+  attachments Attachment[]
+  comments    Comment[]
+  activities  Activity[]
+
+  @@index([listId])
+  @@index([userId])
+  @@index([assigneeId])
+}
+
+model Label {
+  id        String   @id @default(cuid())
+  name      String
+  color     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  cards Card[]
+}
+
+model Attachment {
+  id        String   @id @default(cuid())
+  name      String
+  url       String
+  type      String // file type: image, document, etc.
+  size      Int // file size in bytes
+  createdAt DateTime @default(now())
+
+  // Relations
+  cardId String
+  card   Card   @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  @@index([cardId])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  cardId String
+  card   Card   @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation("CommentToUser", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([cardId])
+  @@index([userId])
+}
+
+model Activity {
+  id         String   @id @default(cuid())
+  type       String // e.g., "create_card", "move_card", "add_comment"
+  entityType String // e.g., "card", "list", "board"
+  entityId   String // ID of the entity this activity relates to
+  data       Json? // Additional data about the activity
+  createdAt  DateTime @default(now())
+
+  // Relations
+  userId  String
+  user    User    @relation("ActivityToUser", fields: [userId], references: [id], onDelete: Cascade)
+  boardId String?
+  board   Board?  @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  cardId  String?
+  card    Card?   @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([boardId])
+  @@index([cardId])
+  @@index([entityType, entityId])
+}
+
+// New model for board members (collaborators with edit permissions)
+model BoardMember {
+  id        String   @id @default(cuid())
+  role      String   @default("EDITOR") // EDITOR, VIEWER, etc.
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  boardId String
+  board   Board  @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  userId  String
+  user    User   @relation("BoardMemberToUser", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([boardId, userId])
+  @@index([boardId])
+  @@index([userId])
+}
+
+// New model for temporary share links
+model BoardShare {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  // Relations
+  boardId String
+  board   Board  @relation(fields: [boardId], references: [id], onDelete: Cascade)
+
+  @@index([boardId])
+  @@index([token])
+}

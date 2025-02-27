@@ -1,0 +1,9 @@
+// This is a placeholder for the dashboard-preview.png image
+// You'll need to replace this with an actual PNG image file
+// The image should show a preview of the Boardly dashboard with boards, lists, and cards
+// 
+// For a proper implementation, you should:
+// 1. Create a real PNG image showing a Boardly dashboard mockup
+// 2. Save it as dashboard-preview.png in the public directory
+// 3. Make sure the image has dimensions close to 1200x675 for optimal display
+// 4. Include visual elements like boards, lists, cards, and AI suggestions 
